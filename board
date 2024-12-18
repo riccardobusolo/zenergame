@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/ >
+    <title>Pagina di Prova</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #555;
+        }
+        .box {
+            background-color: #f0f0f0;
+            padding: 20px;
+            margin: 20px auto;
+            width: 300px;
+            border-radius: 5px;
+        }
+        a {
+            text-decoration: none;
+            color: #0066cc;
+        }
+        a:hover {
+            color: #003366;
+        }
+    </style>
+</head>
+<body>
+    <h1>Benvenuto nella Pagina di Prova</h1>
+    <p>Questa è una semplice pagina HTML di esempio.</p>
+    <div class="box">
+        <p>Qui puoi inserire il tuo contenuto, come testo, immagini o link.</p>
+    </div>
+    <p>Visita la <a href="https://www.example.com" target="_blank">pagina principale</a>.</p>
+</body>
+</html>
