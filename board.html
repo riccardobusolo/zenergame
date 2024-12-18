@@ -37,38 +37,37 @@
         margin-bottom: 20px;
     }
 
-    .card {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top:0; left:0;
-        border-radius: 10px;
-        backface-visibility: hidden;
-        transform-style: preserve-3d;
-    }
-
     .card-inner {
         width:100%;
         height:100%;
         position:relative;
         transform-style: preserve-3d;
         transition: transform 0.8s;
+        /* Inizialmente la carta è ruotata per mostrare il retro */
+        transform: rotateY(180deg);
     }
 
-    .card-face-down {
+    .card {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top:0; 
+        left:0;
+        border-radius: 10px;
+        backface-visibility: hidden;
+    }
+
+    /* Fronte e Retro */
+    .card-back {
         background: linear-gradient(45deg, #999, #777);
         transform: rotateY(0deg);
     }
 
-    .card-face-up {
+    .card-front {
         background: white;
         display:flex;
         align-items:center;
         justify-content:center;
-        transform: rotateY(180deg);
-    }
-
-    .flip-card .card-inner {
         transform: rotateY(180deg);
     }
 
@@ -263,12 +262,12 @@
 </header>
 <div class="game-container">
     <div class="deck-container">
-        <div class="card-inner">
+        <div class="card-inner" id="card-inner">
             <!-- Carta retro -->
-            <div class="card card-face-down" id="card-back">
+            <div class="card card-back" id="card-back">
             </div>
             <!-- Carta fronte -->
-            <div class="card card-face-up" id="card-front">
+            <div class="card card-front" id="card-front">
                 <!-- Qui comparirà il simbolo -->
             </div>
         </div>
@@ -324,7 +323,7 @@
     let gameHistory = [];
 
     const cardFront = document.getElementById('card-front');
-    const cardBack = document.getElementById('card-back');
+    const cardInner = document.getElementById('card-inner');
     const correctCountEl = document.getElementById('correct-count');
     const wrongCountEl = document.getElementById('wrong-count');
     const historyList = document.getElementById('history-list');
@@ -335,7 +334,7 @@
 
     // Inizializza nuova partita
     function newGame() {
-        // Se la partita è terminata, salviamo il risultato nella cronologia
+        // Se la partita precedente è terminata, salviamo il risultato
         if(currentIndex === 25) {
             saveGameResult();
         }
@@ -344,12 +343,10 @@
         correctCount = 0;
         wrongCount = 0;
         updateCounters();
-
-        // Mostra carta coperta
         resetCard();
     }
 
-    // Genera 25 carte casuali da 5 simboli
+    // Genera 25 carte casuali
     function generateDeck() {
         let deck = [];
         for(let i=0; i<25; i++){
@@ -366,8 +363,8 @@
     // Mostra la carta coperta (reset)
     function resetCard() {
         cardFront.innerHTML = "";
-        const cardInner = document.querySelector('.card-inner');
-        cardInner.classList.remove('flip-card');
+        // Torna a mostrare il retro (180°)
+        cardInner.style.transform = "rotateY(180deg)";
     }
 
     // Quando l'utente fa una scelta
@@ -409,11 +406,11 @@
         cardFront.innerHTML = "";
         cardFront.appendChild(symbolEl);
 
-        const cardInner = document.querySelector('.card-inner');
-        cardInner.classList.add('flip-card');
+        // Ruotiamo per mostrare il fronte (0°)
+        cardInner.style.transform = "rotateY(0deg)";
     }
 
-    // Mostra la statistica finale
+    // Mostra le statistiche finali
     function showStatistics() {
         let k = correctCount;
         let n = 25;
@@ -470,4 +467,5 @@
 </script>
 </body>
 </html>
+
 
