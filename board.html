@@ -33,7 +33,7 @@
         width: 150px;
         height: 200px;
         margin: 0 auto;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
     }
 
     .card {
@@ -221,6 +221,34 @@
         color:#fff;
     }
 
+    #result-message {
+        font-size:16px;
+        font-weight:bold;
+        margin-bottom:20px;
+        height:20px; /* Avoid layout shift */
+    }
+
+    #result-message.correct {
+        color: green;
+    }
+
+    #result-message.wrong {
+        color: red;
+    }
+
+    .log-container {
+        margin-top:20px;
+        background:#fff;
+        padding:20px;
+        border-radius:5px;
+        width:80%;
+        box-sizing:border-box;
+        max-width:600px;
+        text-align:left;
+    }
+    .log-container h3 {
+        margin-top:0;
+    }
 </style>
 </head>
 <body>
@@ -231,6 +259,8 @@
     <div class="deck-container">
         <div class="card" id="card"></div>
     </div>
+
+    <div id="result-message"></div>
 
     <div class="choices">
         <button class="choice-btn" data-symbol="circle">
@@ -264,11 +294,16 @@
         <button id="new-game">New Game</button>
         <button id="download-sequence">Download Sequence</button>
     </div>
-</div>
 
-<div class="history">
-    <h3>Previous Games History</h3>
-    <ul id="history-list"></ul>
+    <div class="log-container">
+        <h3>Card Log</h3>
+        <ul id="card-log"></ul>
+    </div>
+
+    <div class="history">
+        <h3>Previous Games History</h3>
+        <ul id="history-list"></ul>
+    </div>
 </div>
 
 
@@ -284,6 +319,8 @@
     const correctCountEl = document.getElementById('correct-count');
     const cardNumberEl = document.getElementById('card-number');
     const historyList = document.getElementById('history-list');
+    const resultMessage = document.getElementById('result-message');
+    const cardLog = document.getElementById('card-log');
 
     const choiceButtons = document.querySelectorAll('.choice-btn');
     const newGameBtn = document.getElementById('new-game');
@@ -300,6 +337,9 @@
         correctCount = 0;
         updateCounters();
         resetCard();
+        resultMessage.textContent = "";
+        resultMessage.className = "";
+        cardLog.innerHTML = "";
     }
 
     // Generate 25 random cards
@@ -320,6 +360,8 @@
     function resetCard() {
         cardEl.innerHTML = "";
         cardEl.style.background = "linear-gradient(45deg, #999, #777)";
+        resultMessage.textContent = "";
+        resultMessage.className = "";
     }
 
     // When user chooses a symbol
@@ -333,20 +375,28 @@
             showCard(actualCard);
 
             // Check guess
-            if(userGuess === actualCard) {
+            let correct = (userGuess === actualCard);
+            if(correct) {
                 correctCount++;
+                resultMessage.textContent = "Correct!";
+                resultMessage.className = "correct";
+            } else {
+                resultMessage.textContent = "Wrong!";
+                resultMessage.className = "wrong";
             }
+
+            // Log this card
+            logCard(actualCard, correct, currentIndex+1);
 
             currentIndex++;
             updateCounters();
 
             // If game ended
             if(currentIndex === 25) {
-                setTimeout(showStatistics, 500);
-            } else {
-                // Move on to the next card
-                setTimeout(resetCard, 1000);
-            }
+                showStatistics();
+            } 
+            // No reset of card or timer - the card remains visible
+            // The next guess will show the next card
         });
     });
 
@@ -358,9 +408,14 @@
             let inner = document.createElement('div');
             symbolEl.appendChild(inner);
         }
-        cardEl.innerHTML = "";
         cardEl.style.background = "white";
         cardEl.appendChild(symbolEl);
+    }
+
+    function logCard(symbol, correct, cardNumber) {
+        let li = document.createElement('li');
+        li.textContent = "Card #" + cardNumber + ": " + symbol + " - " + (correct ? "Correct" : "Wrong");
+        cardLog.appendChild(li);
     }
 
     // Show final stats
@@ -420,4 +475,5 @@
 </script>
 </body>
 </html>
+
 
