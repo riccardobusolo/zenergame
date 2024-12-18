@@ -40,16 +40,24 @@
     .card {
         width: 100%;
         height: 100%;
-        background: #ccc;
-        border-radius: 10px;
         position: absolute;
+        top:0; left:0;
+        border-radius: 10px;
         backface-visibility: hidden;
+        transform-style: preserve-3d;
+    }
+
+    .card-inner {
+        width:100%;
+        height:100%;
+        position:relative;
         transform-style: preserve-3d;
         transition: transform 0.8s;
     }
 
     .card-face-down {
         background: linear-gradient(45deg, #999, #777);
+        transform: rotateY(0deg);
     }
 
     .card-face-up {
@@ -57,6 +65,11 @@
         display:flex;
         align-items:center;
         justify-content:center;
+        transform: rotateY(180deg);
+    }
+
+    .flip-card .card-inner {
+        transform: rotateY(180deg);
     }
 
     /* Le 5 forme Zener (solo CSS) */
@@ -97,7 +110,7 @@
         transform: translateY(-50%);
     }
 
-    /* Linee ondulate (blu) - semplificate come tre linee curve */
+    /* Linee ondulate (blu) */
     .symbol.wavy {
         display: flex;
         flex-direction: column;
@@ -122,7 +135,7 @@
         height:70px;
     }
 
-    /* Stella (viola) - utilizzeremo un clip-path per una forma a stella */
+    /* Stella (viola) */
     .symbol.star {
         background: purple;
         clip-path: polygon(50% 0%, 61% 38%,100% 38%,68% 59%,79% 100%,50% 75%,21% 100%,32% 59%,0 38%,39% 38%);
@@ -242,11 +255,6 @@
         color:#fff;
     }
 
-    /* Animazione flip della carta */
-    .flip-card {
-        transform: rotateY(180deg);
-    }
-
 </style>
 </head>
 <body>
@@ -255,12 +263,14 @@
 </header>
 <div class="game-container">
     <div class="deck-container">
-        <!-- Carta frontale (facciale) -->
-        <div class="card card-face-up" id="card-front" style="transform: rotateY(180deg);">
-            <!-- Qui comparirà il simbolo -->
-        </div>
-        <!-- Carta coperta (retro) -->
-        <div class="card card-face-down" id="card-back">
+        <div class="card-inner">
+            <!-- Carta retro -->
+            <div class="card card-face-down" id="card-back">
+            </div>
+            <!-- Carta fronte -->
+            <div class="card card-face-up" id="card-front">
+                <!-- Qui comparirà il simbolo -->
+            </div>
         </div>
     </div>
 
@@ -337,7 +347,6 @@
 
         // Mostra carta coperta
         resetCard();
-        // Carichiamo la nuova sequenza
     }
 
     // Genera 25 carte casuali da 5 simboli
@@ -357,7 +366,8 @@
     // Mostra la carta coperta (reset)
     function resetCard() {
         cardFront.innerHTML = "";
-        cardFront.parentElement.classList.remove('flip-card');
+        const cardInner = document.querySelector('.card-inner');
+        cardInner.classList.remove('flip-card');
     }
 
     // Quando l'utente fa una scelta
@@ -381,7 +391,6 @@
             if(currentIndex === 25) {
                 setTimeout(showStatistics, 500);
             } else {
-                // Al prossimo click verrà girata la prossima carta
                 // Aspettiamo un attimo e poi resettiamo la carta
                 setTimeout(resetCard, 1000);
             }
@@ -393,7 +402,6 @@
         let symbolEl = document.createElement('div');
         symbolEl.classList.add('symbol', symbol);
         if(symbol === 'wavy') {
-            // Per wavy aggiungiamo il contenuto interno
             let inner = document.createElement('div');
             symbolEl.appendChild(inner);
         }
@@ -401,12 +409,11 @@
         cardFront.innerHTML = "";
         cardFront.appendChild(symbolEl);
 
-        // Flip card
-        cardFront.parentElement.classList.add('flip-card');
+        const cardInner = document.querySelector('.card-inner');
+        cardInner.classList.add('flip-card');
     }
 
-    // Mostra la statistica finale: probabilità di indovinare X carte su 25
-    // Supponiamo scelta casuale p=1/5, è una distribuzione binomiale: C(25,k)* (1/5)^k * (4/5)^(25-k)
+    // Mostra la statistica finale
     function showStatistics() {
         let k = correctCount;
         let n = 25;
@@ -441,7 +448,7 @@
         historyList.appendChild(li);
     }
 
-    // Scarica la sequenza di carte (prima della partita o durante)
+    // Scarica la sequenza di carte
     downloadBtn.addEventListener('click', ()=>{
         let text = "Sequenza Carte (25):\n" + currentDeck.join('\n');
         let blob = new Blob([text], {type: 'text/plain'});
@@ -463,3 +470,4 @@
 </script>
 </body>
 </html>
+
