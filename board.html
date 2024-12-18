@@ -1,43 +1,465 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/ >
-    <title>Pagina di Prova</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
-        }
-        h1 {
-            color: #333;
-        }
-        p {
-            color: #555;
-        }
-        .box {
-            background-color: #f0f0f0;
-            padding: 20px;
-            margin: 20px auto;
-            width: 300px;
-            border-radius: 5px;
-        }
-        a {
-            text-decoration: none;
-            color: #0066cc;
-        }
-        a:hover {
-            color: #003366;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gioco di Carte Zener</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f0f0;
+        margin:0;
+        padding:0;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+    }
+
+    header {
+        background: #4e4e4e;
+        width:100%;
+        color: white;
+        text-align:center;
+        padding:15px;
+    }
+
+    .game-container {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .deck-container {
+        position: relative;
+        width: 150px;
+        height: 200px;
+        margin: 0 auto;
+        perspective: 1000px;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        width: 100%;
+        height: 100%;
+        background: #ccc;
+        border-radius: 10px;
+        position: absolute;
+        backface-visibility: hidden;
+        transform-style: preserve-3d;
+        transition: transform 0.8s;
+    }
+
+    .card-face-down {
+        background: linear-gradient(45deg, #999, #777);
+    }
+
+    .card-face-up {
+        background: white;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    /* Le 5 forme Zener (solo CSS) */
+    .symbol {
+        width: 70px;
+        height: 70px;
+        position: relative;
+    }
+
+    /* Cerchio (rosso) */
+    .symbol.circle {
+        background: red;
+        border-radius: 50%;
+    }
+
+    /* Croce/Plus (verde) */
+    .symbol.plus {
+        position: relative;
+        background: transparent;
+    }
+    .symbol.plus::before, .symbol.plus::after {
+        content: "";
+        position: absolute;
+        background: green;
+    }
+    .symbol.plus::before {
+        width: 15px;
+        height: 70px;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+    }
+    .symbol.plus::after {
+        width: 70px;
+        height: 15px;
+        top: 50%;
+        left:0;
+        transform: translateY(-50%);
+    }
+
+    /* Linee ondulate (blu) - semplificate come tre linee curve */
+    .symbol.wavy {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+    }
+    .symbol.wavy::before, .symbol.wavy::after, .symbol.wavy div {
+        content: "";
+        width: 70px;
+        height: 10px;
+        background: blue;
+        border-radius: 10px/5px;
+        transform: skewX(-20deg);
+    }
+    .symbol.wavy div {
+        margin:0 auto;
+    }
+
+    /* Quadrato (arancione) */
+    .symbol.square {
+        background: orange;
+        width:70px;
+        height:70px;
+    }
+
+    /* Stella (viola) - utilizzeremo un clip-path per una forma a stella */
+    .symbol.star {
+        background: purple;
+        clip-path: polygon(50% 0%, 61% 38%,100% 38%,68% 59%,79% 100%,50% 75%,21% 100%,32% 59%,0 38%,39% 38%);
+    }
+
+    /* Pulsanti per le scelte */
+    .choices {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom:20px;
+    }
+
+    .choice-btn {
+        cursor: pointer;
+        border: none;
+        background: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        font-size:14px;
+        box-shadow:0 0 2px rgba(0,0,0,0.3);
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        width:60px;
+        height:100px;
+    }
+
+    .choice-btn .mini-symbol {
+        width:30px;
+        height:30px;
+        margin-bottom:5px;
+    }
+
+    .mini-symbol.circle {background:red; border-radius:50%;}
+    .mini-symbol.plus {
+        position: relative;
+        background: transparent;
+    }
+    .mini-symbol.plus::before, .mini-symbol.plus::after {
+        content: "";
+        position: absolute;
+        background: green;
+    }
+    .mini-symbol.plus::before {
+        width: 6px;
+        height: 30px;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+    }
+    .mini-symbol.plus::after {
+        width: 30px;
+        height: 6px;
+        top: 50%;
+        left:0;
+        transform: translateY(-50%);
+    }
+    .mini-symbol.wavy {
+        background: blue;
+        width:30px;
+        height:6px;
+        border-radius:3px;
+        transform: skewX(-20deg);
+        margin-top:12px;
+    }
+
+    .mini-symbol.square {
+        background: orange;
+        width:30px;
+        height:30px;
+    }
+
+    .mini-symbol.star {
+        background: purple;
+        clip-path: polygon(50% 0%, 61% 38%,100% 38%,68% 59%,79% 100%,50% 75%,21% 100%,32% 59%,0 38%,39% 38%);
+    }
+
+    /* Contatori */
+    .counters {
+        margin-bottom:20px;
+    }
+
+    .counters span {
+        margin:0 10px;
+        font-size:16px;
+        font-weight:bold;
+    }
+
+    /* Cronologia */
+    .history {
+        margin-top:20px;
+        background:#fff;
+        padding:20px;
+        border-radius:5px;
+        width:80%;
+        box-sizing:border-box;
+        max-width:600px;
+        text-align:left;
+    }
+
+    .history h3 {
+        margin-top:0;
+    }
+
+    .controls {
+        margin-bottom:20px;
+    }
+
+    .controls button {
+        margin:5px;
+        padding:10px;
+        cursor:pointer;
+        border:none;
+        border-radius:5px;
+        background:#4e4e4e;
+        color:#fff;
+    }
+
+    /* Animazione flip della carta */
+    .flip-card {
+        transform: rotateY(180deg);
+    }
+
+</style>
 </head>
 <body>
-    <h1>Benvenuto nella Pagina di Prova</h1>
-    <p>Questa è una semplice pagina HTML di esempio.</p>
-    <div class="box">
-        <p>Qui puoi inserire il tuo contenuto, come testo, immagini o link.</p>
+<header>
+    <h1>Gioco di Carte Zener</h1>
+</header>
+<div class="game-container">
+    <div class="deck-container">
+        <!-- Carta frontale (facciale) -->
+        <div class="card card-face-up" id="card-front" style="transform: rotateY(180deg);">
+            <!-- Qui comparirà il simbolo -->
+        </div>
+        <!-- Carta coperta (retro) -->
+        <div class="card card-face-down" id="card-back">
+        </div>
     </div>
-    <p>Visita la <a href="https://www.example.com" target="_blank">pagina principale</a>.</p>
+
+    <div class="choices">
+        <button class="choice-btn" data-symbol="circle">
+            <div class="mini-symbol circle"></div>
+            Cerchio
+        </button>
+        <button class="choice-btn" data-symbol="plus">
+            <div class="mini-symbol plus"></div>
+            Croce
+        </button>
+        <button class="choice-btn" data-symbol="wavy">
+            <div class="mini-symbol wavy"></div>
+            Ondulato
+        </button>
+        <button class="choice-btn" data-symbol="square">
+            <div class="mini-symbol square"></div>
+            Quadrato
+        </button>
+        <button class="choice-btn" data-symbol="star">
+            <div class="mini-symbol star"></div>
+            Stella
+        </button>
+    </div>
+
+    <div class="counters">
+        <span>Indovinate: <span id="correct-count">0</span></span>
+        <span>Sbagliate: <span id="wrong-count">0</span></span>
+    </div>
+
+    <div class="controls">
+        <button id="new-game">Nuova Partita</button>
+        <button id="download-sequence">Scarica Sequenza</button>
+    </div>
+</div>
+
+<div class="history">
+    <h3>Cronologia Partite Precedenti</h3>
+    <ul id="history-list"></ul>
+</div>
+
+
+<script>
+(function(){
+    const symbols = ["circle","plus","wavy","square","star"];
+    let currentDeck = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let gameHistory = [];
+
+    const cardFront = document.getElementById('card-front');
+    const cardBack = document.getElementById('card-back');
+    const correctCountEl = document.getElementById('correct-count');
+    const wrongCountEl = document.getElementById('wrong-count');
+    const historyList = document.getElementById('history-list');
+
+    const choiceButtons = document.querySelectorAll('.choice-btn');
+    const newGameBtn = document.getElementById('new-game');
+    const downloadBtn = document.getElementById('download-sequence');
+
+    // Inizializza nuova partita
+    function newGame() {
+        // Se la partita è terminata, salviamo il risultato nella cronologia
+        if(currentIndex === 25) {
+            saveGameResult();
+        }
+        currentDeck = generateDeck();
+        currentIndex = 0;
+        correctCount = 0;
+        wrongCount = 0;
+        updateCounters();
+
+        // Mostra carta coperta
+        resetCard();
+        // Carichiamo la nuova sequenza
+    }
+
+    // Genera 25 carte casuali da 5 simboli
+    function generateDeck() {
+        let deck = [];
+        for(let i=0; i<25; i++){
+            deck.push(symbols[Math.floor(Math.random()*symbols.length)]);
+        }
+        return deck;
+    }
+
+    function updateCounters() {
+        correctCountEl.textContent = correctCount;
+        wrongCountEl.textContent = wrongCount;
+    }
+
+    // Mostra la carta coperta (reset)
+    function resetCard() {
+        cardFront.innerHTML = "";
+        cardFront.parentElement.classList.remove('flip-card');
+    }
+
+    // Quando l'utente fa una scelta
+    choiceButtons.forEach(btn => {
+        btn.addEventListener('click', ()=>{
+            if (currentIndex >= 25) return;
+            let userGuess = btn.getAttribute('data-symbol');
+            let actualCard = currentDeck[currentIndex];
+            // Riveliamo la carta
+            showCard(actualCard);
+            // Confrontiamo
+            if(userGuess === actualCard) {
+                correctCount++;
+            } else {
+                wrongCount++;
+            }
+            updateCounters();
+            currentIndex++;
+
+            // Se abbiamo finito le 25 carte, mostriamo la probabilità
+            if(currentIndex === 25) {
+                setTimeout(showStatistics, 500);
+            } else {
+                // Al prossimo click verrà girata la prossima carta
+                // Aspettiamo un attimo e poi resettiamo la carta
+                setTimeout(resetCard, 1000);
+            }
+        });
+    });
+
+    function showCard(symbol) {
+        // Creiamo l'elemento simbolo da mostrare
+        let symbolEl = document.createElement('div');
+        symbolEl.classList.add('symbol', symbol);
+        if(symbol === 'wavy') {
+            // Per wavy aggiungiamo il contenuto interno
+            let inner = document.createElement('div');
+            symbolEl.appendChild(inner);
+        }
+
+        cardFront.innerHTML = "";
+        cardFront.appendChild(symbolEl);
+
+        // Flip card
+        cardFront.parentElement.classList.add('flip-card');
+    }
+
+    // Mostra la statistica finale: probabilità di indovinare X carte su 25
+    // Supponiamo scelta casuale p=1/5, è una distribuzione binomiale: C(25,k)* (1/5)^k * (4/5)^(25-k)
+    function showStatistics() {
+        let k = correctCount;
+        let n = 25;
+        let p = 1/5;
+        let probability = binomialProbability(n, k, p);
+        alert("Partita terminata!\nIndovinate: " + k + " su 25\nProbabilità statistica di questo risultato: " + (probability*100).toFixed(2) + "%");
+    }
+
+    function factorial(x) {
+        if(x<=1) return 1;
+        let f=1;
+        for(let i=2;i<=x;i++){
+            f*=i;
+        }
+        return f;
+    }
+
+    function combination(n,k) {
+        return factorial(n)/(factorial(k)*factorial(n-k));
+    }
+
+    function binomialProbability(n,k,p) {
+        return combination(n,k)*Math.pow(p,k)*Math.pow(1-p,n-k);
+    }
+
+    // Salva il risultato della partita nella cronologia
+    function saveGameResult() {
+        let k = correctCount;
+        let probability = binomialProbability(25,k,1/5)*100;
+        let li = document.createElement('li');
+        li.textContent = "Indovinate: " + k + "/25, Probabilità: " + probability.toFixed(2) + "%";
+        historyList.appendChild(li);
+    }
+
+    // Scarica la sequenza di carte (prima della partita o durante)
+    downloadBtn.addEventListener('click', ()=>{
+        let text = "Sequenza Carte (25):\n" + currentDeck.join('\n');
+        let blob = new Blob([text], {type: 'text/plain'});
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = "sequenza_carte_zener.txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+
+    newGameBtn.addEventListener('click', newGame);
+
+    // Inizializza la prima partita
+    newGame();
+})();
+</script>
 </body>
 </html>
