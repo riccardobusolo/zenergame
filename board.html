@@ -46,7 +46,7 @@
         justify-content:center;
     }
 
-    /* Symbols */
+    /* Symbols on the card */
     .symbol {
         width: 70px;
         height: 70px;
@@ -132,6 +132,7 @@
         height:100px;
     }
 
+    /* Mini-symbols for the buttons */
     .choice-btn .mini-symbol {
         width:30px;
         height:30px;
@@ -139,6 +140,7 @@
     }
 
     .mini-symbol.circle {background:red; border-radius:50%;}
+    
     .mini-symbol.plus {
         position: relative;
         background: transparent;
@@ -162,13 +164,22 @@
         left:0;
         transform: translateY(-50%);
     }
+
+    /* Mini wavy symbol with 3 bars */
     .mini-symbol.wavy {
-        background: blue;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        height:30px;
+        width:30px;
+    }
+    .mini-symbol.wavy div {
         width:30px;
         height:6px;
+        background: blue;
         border-radius:3px;
         transform: skewX(-20deg);
-        margin-top:12px;
     }
 
     .mini-symbol.square {
@@ -272,7 +283,11 @@
             Cross
         </button>
         <button class="choice-btn" data-symbol="wavy">
-            <div class="mini-symbol wavy"></div>
+            <div class="mini-symbol wavy">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
             Wavy
         </button>
         <button class="choice-btn" data-symbol="square">
@@ -311,7 +326,7 @@
 (function(){
     const symbols = ["circle","plus","wavy","square","star"];
     let currentDeck = [];
-    let currentIndex = 0;   // currentIndex da 0 a 24 (25 carte)
+    let currentIndex = 0;   // currentIndex from 0 to 24
     let correctCount = 0;
 
     const cardEl = document.getElementById('card');
@@ -352,7 +367,6 @@
 
     function updateCounters() {
         correctCountEl.textContent = correctCount;
-        // currentIndex parte da 0, quindi la carta corrente è currentIndex+1
         cardNumberEl.textContent = currentIndex+1; 
     }
 
@@ -393,10 +407,8 @@
 
             // If game ended
             if(currentIndex === 25) {
-                // No updateCounters here, because that would show 26/25
                 showStatistics();
             } else {
-                // Only update counters if there are still cards
                 updateCounters();
             }
         });
@@ -477,3 +489,4 @@
 </script>
 </body>
 </html>
+
