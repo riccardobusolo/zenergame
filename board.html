@@ -311,9 +311,8 @@
 (function(){
     const symbols = ["circle","plus","wavy","square","star"];
     let currentDeck = [];
-    let currentIndex = 0;
+    let currentIndex = 0;   // currentIndex da 0 a 24 (25 carte)
     let correctCount = 0;
-    let gameHistory = [];
 
     const cardEl = document.getElementById('card');
     const correctCountEl = document.getElementById('correct-count');
@@ -345,7 +344,7 @@
     // Generate 25 random cards
     function generateDeck() {
         let deck = [];
-        for(let i=1; i<25; i++){
+        for(let i=0; i<25; i++){
             deck.push(symbols[Math.floor(Math.random()*symbols.length)]);
         }
         return deck;
@@ -353,6 +352,7 @@
 
     function updateCounters() {
         correctCountEl.textContent = correctCount;
+        // currentIndex parte da 0, quindi la carta corrente è currentIndex+1
         cardNumberEl.textContent = currentIndex+1; 
     }
 
@@ -367,7 +367,8 @@
     // When user chooses a symbol
     choiceButtons.forEach(btn => {
         btn.addEventListener('click', ()=>{
-            if (currentIndex >= 25) return;
+            if (currentIndex >= 25) return; // no more cards
+
             let userGuess = btn.getAttribute('data-symbol');
             let actualCard = currentDeck[currentIndex];
 
@@ -389,14 +390,15 @@
             logCard(actualCard, correct, currentIndex+1);
 
             currentIndex++;
-            updateCounters();
 
             // If game ended
             if(currentIndex === 25) {
+                // No updateCounters here, because that would show 26/25
                 showStatistics();
-            } 
-            // No reset of card or timer - the card remains visible
-            // The next guess will show the next card
+            } else {
+                // Only update counters if there are still cards
+                updateCounters();
+            }
         });
     });
 
@@ -475,5 +477,3 @@
 </script>
 </body>
 </html>
-
-
