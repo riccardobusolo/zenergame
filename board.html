@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Gioco di Carte Zener</title>
+<title>Zener Card Game</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -33,58 +33,31 @@
         width: 150px;
         height: 200px;
         margin: 0 auto;
-        perspective: 1000px;
         margin-bottom: 20px;
-    }
-
-    .card-inner {
-        width:100%;
-        height:100%;
-        position:relative;
-        transform-style: preserve-3d;
-        transition: transform 0.8s;
-        /* Inizialmente la carta è ruotata per mostrare il retro */
-        transform: rotateY(180deg);
     }
 
     .card {
         width: 100%;
         height: 100%;
-        position: absolute;
-        top:0; 
-        left:0;
         border-radius: 10px;
-        backface-visibility: hidden;
-    }
-
-    /* Fronte e Retro */
-    .card-back {
         background: linear-gradient(45deg, #999, #777);
-        transform: rotateY(0deg);
-    }
-
-    .card-front {
-        background: white;
         display:flex;
         align-items:center;
         justify-content:center;
-        transform: rotateY(180deg);
     }
 
-    /* Le 5 forme Zener (solo CSS) */
+    /* Symbols */
     .symbol {
         width: 70px;
         height: 70px;
         position: relative;
     }
 
-    /* Cerchio (rosso) */
     .symbol.circle {
         background: red;
         border-radius: 50%;
     }
 
-    /* Croce/Plus (verde) */
     .symbol.plus {
         position: relative;
         background: transparent;
@@ -109,7 +82,6 @@
         transform: translateY(-50%);
     }
 
-    /* Linee ondulate (blu) */
     .symbol.wavy {
         display: flex;
         flex-direction: column;
@@ -127,20 +99,17 @@
         margin:0 auto;
     }
 
-    /* Quadrato (arancione) */
     .symbol.square {
         background: orange;
         width:70px;
         height:70px;
     }
 
-    /* Stella (viola) */
     .symbol.star {
         background: purple;
         clip-path: polygon(50% 0%, 61% 38%,100% 38%,68% 59%,79% 100%,50% 75%,21% 100%,32% 59%,0 38%,39% 38%);
     }
 
-    /* Pulsanti per le scelte */
     .choices {
         display: flex;
         justify-content: center;
@@ -213,7 +182,6 @@
         clip-path: polygon(50% 0%, 61% 38%,100% 38%,68% 59%,79% 100%,50% 75%,21% 100%,32% 59%,0 38%,39% 38%);
     }
 
-    /* Contatori */
     .counters {
         margin-bottom:20px;
     }
@@ -224,7 +192,6 @@
         font-weight:bold;
     }
 
-    /* Cronologia */
     .history {
         margin-top:20px;
         background:#fff;
@@ -258,57 +225,49 @@
 </head>
 <body>
 <header>
-    <h1>Gioco di Carte Zener</h1>
+    <h1>Zener Card Game</h1>
 </header>
 <div class="game-container">
     <div class="deck-container">
-        <div class="card-inner" id="card-inner">
-            <!-- Carta retro -->
-            <div class="card card-back" id="card-back">
-            </div>
-            <!-- Carta fronte -->
-            <div class="card card-front" id="card-front">
-                <!-- Qui comparirà il simbolo -->
-            </div>
-        </div>
+        <div class="card" id="card"></div>
     </div>
 
     <div class="choices">
         <button class="choice-btn" data-symbol="circle">
             <div class="mini-symbol circle"></div>
-            Cerchio
+            Circle
         </button>
         <button class="choice-btn" data-symbol="plus">
             <div class="mini-symbol plus"></div>
-            Croce
+            Cross
         </button>
         <button class="choice-btn" data-symbol="wavy">
             <div class="mini-symbol wavy"></div>
-            Ondulato
+            Wavy
         </button>
         <button class="choice-btn" data-symbol="square">
             <div class="mini-symbol square"></div>
-            Quadrato
+            Square
         </button>
         <button class="choice-btn" data-symbol="star">
             <div class="mini-symbol star"></div>
-            Stella
+            Star
         </button>
     </div>
 
     <div class="counters">
-        <span>Indovinate: <span id="correct-count">0</span></span>
-        <span>Sbagliate: <span id="wrong-count">0</span></span>
+        <span>Guessed: <span id="correct-count">0</span>/25</span>
+        <span>Card number: <span id="card-number">1</span>/25</span>
     </div>
 
     <div class="controls">
-        <button id="new-game">Nuova Partita</button>
-        <button id="download-sequence">Scarica Sequenza</button>
+        <button id="new-game">New Game</button>
+        <button id="download-sequence">Download Sequence</button>
     </div>
 </div>
 
 <div class="history">
-    <h3>Cronologia Partite Precedenti</h3>
+    <h3>Previous Games History</h3>
     <ul id="history-list"></ul>
 </div>
 
@@ -319,34 +278,31 @@
     let currentDeck = [];
     let currentIndex = 0;
     let correctCount = 0;
-    let wrongCount = 0;
     let gameHistory = [];
 
-    const cardFront = document.getElementById('card-front');
-    const cardInner = document.getElementById('card-inner');
+    const cardEl = document.getElementById('card');
     const correctCountEl = document.getElementById('correct-count');
-    const wrongCountEl = document.getElementById('wrong-count');
+    const cardNumberEl = document.getElementById('card-number');
     const historyList = document.getElementById('history-list');
 
     const choiceButtons = document.querySelectorAll('.choice-btn');
     const newGameBtn = document.getElementById('new-game');
     const downloadBtn = document.getElementById('download-sequence');
 
-    // Inizializza nuova partita
+    // Start a new game
     function newGame() {
-        // Se la partita precedente è terminata, salviamo il risultato
+        // If previous game ended, save result
         if(currentIndex === 25) {
             saveGameResult();
         }
         currentDeck = generateDeck();
         currentIndex = 0;
         correctCount = 0;
-        wrongCount = 0;
         updateCounters();
         resetCard();
     }
 
-    // Genera 25 carte casuali
+    // Generate 25 random cards
     function generateDeck() {
         let deck = [];
         for(let i=0; i<25; i++){
@@ -357,66 +313,63 @@
 
     function updateCounters() {
         correctCountEl.textContent = correctCount;
-        wrongCountEl.textContent = wrongCount;
+        cardNumberEl.textContent = currentIndex+1; 
     }
 
-    // Mostra la carta coperta (reset)
+    // Reset card to blank/back
     function resetCard() {
-        cardFront.innerHTML = "";
-        // Torna a mostrare il retro (180°)
-        cardInner.style.transform = "rotateY(180deg)";
+        cardEl.innerHTML = "";
+        cardEl.style.background = "linear-gradient(45deg, #999, #777)";
     }
 
-    // Quando l'utente fa una scelta
+    // When user chooses a symbol
     choiceButtons.forEach(btn => {
         btn.addEventListener('click', ()=>{
             if (currentIndex >= 25) return;
             let userGuess = btn.getAttribute('data-symbol');
             let actualCard = currentDeck[currentIndex];
-            // Riveliamo la carta
+
+            // Show the card
             showCard(actualCard);
-            // Confrontiamo
+
+            // Check guess
             if(userGuess === actualCard) {
                 correctCount++;
-            } else {
-                wrongCount++;
             }
-            updateCounters();
-            currentIndex++;
 
-            // Se abbiamo finito le 25 carte, mostriamo la probabilità
+            currentIndex++;
+            updateCounters();
+
+            // If game ended
             if(currentIndex === 25) {
                 setTimeout(showStatistics, 500);
             } else {
-                // Aspettiamo un attimo e poi resettiamo la carta
+                // Move on to the next card
                 setTimeout(resetCard, 1000);
             }
         });
     });
 
     function showCard(symbol) {
-        // Creiamo l'elemento simbolo da mostrare
+        cardEl.innerHTML = "";
         let symbolEl = document.createElement('div');
         symbolEl.classList.add('symbol', symbol);
         if(symbol === 'wavy') {
             let inner = document.createElement('div');
             symbolEl.appendChild(inner);
         }
-
-        cardFront.innerHTML = "";
-        cardFront.appendChild(symbolEl);
-
-        // Ruotiamo per mostrare il fronte (0°)
-        cardInner.style.transform = "rotateY(0deg)";
+        cardEl.innerHTML = "";
+        cardEl.style.background = "white";
+        cardEl.appendChild(symbolEl);
     }
 
-    // Mostra le statistiche finali
+    // Show final stats
     function showStatistics() {
         let k = correctCount;
         let n = 25;
         let p = 1/5;
-        let probability = binomialProbability(n, k, p);
-        alert("Partita terminata!\nIndovinate: " + k + " su 25\nProbabilità statistica di questo risultato: " + (probability*100).toFixed(2) + "%");
+        let probability = binomialProbability(n, k, p)*100;
+        alert("Game ended!\nGuessed: " + k + "/25\nProbability: " + probability.toFixed(2) + "%");
     }
 
     function factorial(x) {
@@ -436,23 +389,23 @@
         return combination(n,k)*Math.pow(p,k)*Math.pow(1-p,n-k);
     }
 
-    // Salva il risultato della partita nella cronologia
+    // Save game result
     function saveGameResult() {
         let k = correctCount;
         let probability = binomialProbability(25,k,1/5)*100;
         let li = document.createElement('li');
-        li.textContent = "Indovinate: " + k + "/25, Probabilità: " + probability.toFixed(2) + "%";
+        li.textContent = "Guessed: " + k + "/25, Probability: " + probability.toFixed(2) + "%";
         historyList.appendChild(li);
     }
 
-    // Scarica la sequenza di carte
+    // Download card sequence
     downloadBtn.addEventListener('click', ()=>{
-        let text = "Sequenza Carte (25):\n" + currentDeck.join('\n');
+        let text = "Card sequence (25):\n" + currentDeck.join('\n');
         let blob = new Blob([text], {type: 'text/plain'});
         let url = URL.createObjectURL(blob);
         let a = document.createElement('a');
         a.href = url;
-        a.download = "sequenza_carte_zener.txt";
+        a.download = "zener_card_sequence.txt";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -461,11 +414,10 @@
 
     newGameBtn.addEventListener('click', newGame);
 
-    // Inizializza la prima partita
+    // Initialize first game
     newGame();
 })();
 </script>
 </body>
 </html>
-
 
