@@ -15,14 +15,6 @@
         align-items:center;
     }
 
-    header {
-        background: #4e4e4e;
-        width:100%;
-        color: white;
-        text-align:center;
-        padding:15px;
-    }
-
     .game-container {
         margin-top: 20px;
         text-align: center;
@@ -232,21 +224,6 @@
         color:#fff;
     }
 
-    #result-message {
-        font-size:16px;
-        font-weight:bold;
-        margin-bottom:20px;
-        height:20px; /* Avoid layout shift */
-    }
-
-    #result-message.correct {
-        color: green;
-    }
-
-    #result-message.wrong {
-        color: red;
-    }
-
     .log-container {
         margin-top:20px;
         background:#fff;
@@ -263,15 +240,10 @@
 </style>
 </head>
 <body>
-<header>
-    <h1>Zener Card Game</h1>
-</header>
 <div class="game-container">
     <div class="deck-container">
         <div class="card" id="card"></div>
     </div>
-
-    <div id="result-message"></div>
 
     <div class="choices">
         <button class="choice-btn" data-symbol="circle">
@@ -333,7 +305,6 @@
     const correctCountEl = document.getElementById('correct-count');
     const cardNumberEl = document.getElementById('card-number');
     const historyList = document.getElementById('history-list');
-    const resultMessage = document.getElementById('result-message');
     const cardLog = document.getElementById('card-log');
 
     const choiceButtons = document.querySelectorAll('.choice-btn');
@@ -351,8 +322,6 @@
         correctCount = 0;
         updateCounters();
         resetCard();
-        resultMessage.textContent = "";
-        resultMessage.className = "";
         cardLog.innerHTML = "";
     }
 
@@ -374,8 +343,6 @@
     function resetCard() {
         cardEl.innerHTML = "";
         cardEl.style.background = "linear-gradient(45deg, #999, #777)";
-        resultMessage.textContent = "";
-        resultMessage.className = "";
     }
 
     // When user chooses a symbol
@@ -393,12 +360,7 @@
             let correct = (userGuess === actualCard);
             if(correct) {
                 correctCount++;
-                resultMessage.textContent = "Correct!";
-                resultMessage.className = "correct";
-            } else {
-                resultMessage.textContent = "Wrong!";
-                resultMessage.className = "wrong";
-            }
+            } 
 
             // Log this card
             logCard(actualCard, correct, currentIndex+1);
@@ -489,4 +451,3 @@
 </script>
 </body>
 </html>
-
